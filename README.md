@@ -4,6 +4,9 @@ Project Sleep Quality
 
 To have the repo on your machine 
 
+First fork the original repo.
+Second clone your Fork in visualCode or other thing
+
 => git clone https://github.com/YourFork/Project-Sleep-Quality.git
 
 # Files 
