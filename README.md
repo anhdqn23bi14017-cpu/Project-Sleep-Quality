@@ -29,3 +29,14 @@ git checkout main
 git merge upstram/main
 
 git push origin main 
+
+
+
+# Presentation
+
+
+1. problem definition 
+2. method used
+3. dataset
+4. model evaluation 
+5. a demo
