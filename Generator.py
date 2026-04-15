@@ -1,51 +1,84 @@
 import numpy as np
 import pandas as pd
 
-def generate_dataset(n=100):
-
-    sleep_time = np.random.uniform(21, 26, n) % 24
-    coffee = np.random.randint(0, 5, n)
-    screen_time = np.random.randint(0, 180, n)
-    stress = np.random.randint(1, 11, n)
-    sport = np.random.randint(0, 120, n)
-    nutrition = np.random.randint(1, 11, n)
-
-    sleep_penalty = np.abs(sleep_time - 23)
-
+def generate_dataset(n=100, random_seed=42):
+    """
+    Generate a synthetic sleep quality dataset without coffee/screen time.
+    Features:
+    - sleep_time (hour of day, 0-23, circular around optimal 23:00)
+    - stress_level (1-10, 10=highest stress)
+    - sport_time (hours per week, 0-5)
+    - nutrition (1-10, 10=best diet)
+    The target 'sleep_quality' is binary (0 = poor, 1 = good).
+    """
+    np.random.seed(random_seed)
+    
+    #1.Generate features with realistic distributions
+    #Sleep time: normal around 23:00 (11 PM) with wrap-around
+    raw_sleep = np.random.normal(23, 2, n)
+    sleep_time = raw_sleep % 24
+    
+    #Stress level (1-10, skewed toward medium-high)
+    stress = np.random.beta(a=2, b=3, size=n) * 9 + 1   #range 1-10
+    
+    #Sport time (hours/week) – many zero, some moderate
+    sport = np.random.exponential(scale=1.5, size=n)
+    sport = np.clip(sport, 0, 5)
+    
+    #Nutrition (1-10) – roughly normal around 6
+    nutrition = np.random.normal(6, 1.5, n)
+    nutrition = np.clip(nutrition, 1, 10)
+    
+    #2.Define relationships
+    #Circular distance to optimal bedtime (23:00)
+    diff = np.abs(sleep_time - 23)
+    sleep_penalty = np.minimum(diff, 24 - diff)   #0 at 23, max 12 at 11 AM
+    
+    #U‑shape for sport: optimal around 2-3 hours/week
+    sport_benefit = -0.1 * (sport - 2.5) ** 2 + 0.8   #peaks at 2.5h → +0.8
+    
+    #Base intercept to get realistic class balance (~65% poor, 35% good)
+    base_intercept = -1.2
+    
+    #Raw score (log‑odds before sigmoid)
     score = (
-        -0.5 * sleep_penalty
-        -0.4 * coffee
-        -0.3 * (screen_time / 60)
-        -0.6 * stress
-        +0.4 * (sport / 30)
-        +0.5 * nutrition
+        base_intercept
+        - 0.8 * sleep_penalty          #each hour away from 23 hurts
+        - 0.5 * (stress - 5) / 4       #stress centered at 5
+        + 0.3 * sport_benefit
+        + 0.4 * (nutrition - 5) / 4    #nutrition centered at 5
     )
-
-    score += np.random.normal(0, 0.8, n)
-
+    
+    #Add realistic noise (heteroscedastic: more noise when stressed)
+    noise_std = 0.5 + 0.1 * stress
+    score += np.random.normal(0, noise_std, n)
+    
+    #3.Convert to probability and binary label
     def sigmoid(x):
         return 1 / (1 + np.exp(-x))
-
+    
     prob = sigmoid(score)
     sleep_quality = (prob > 0.5).astype(int)
-
+    
+    #4.Build DataFrame
     df = pd.DataFrame({
-        "sleep_time": sleep_time,
-        "coffee": coffee,
-        "screen_time": screen_time,
-        "stress_level": stress,
-        "sport_time": sport,
-        "nutrition": nutrition,
+        "sleep_time": np.round(sleep_time, 1),
+        "stress_level": np.round(stress, 1),
+        "sport_time": np.round(sport, 1),
+        "nutrition": np.round(nutrition, 1),
         "sleep_quality": sleep_quality
     })
-
+    
     return df
 
-
-# 🔁 Generate new dataset each time
-df = generate_dataset(100)
-
-# ❗ overwrite file
+#Generate and save
+df = generate_dataset(n=200, random_seed=123)
 df.to_csv("Project-Sleep-Quality/DataSet.csv", index=False)
 
-print("✅ Dataset regenerated!")
+#Quick sanity check
+print("Dataset generated")
+print(f"Shape: {df.shape}")
+print(f"Columns: {list(df.columns)}")
+print(f"Class distribution:\n{df['sleep_quality'].value_counts(normalize=True)}")
+print("\nFirst 5 rows:")
+print(df.head())
