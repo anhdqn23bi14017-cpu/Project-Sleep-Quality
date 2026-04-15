@@ -7,7 +7,7 @@ def generate_dataset(n=100, random_seed=42):
     Features:
     - sleep_time (hour of day, 0-23, circular around optimal 23:00)
     - stress_level (1-10, 10=highest stress)
-    - sport_time (hours per week, 0-5)
+    - activity_time (hours per week, 0-5)
     - nutrition (1-10, 10=best diet)
     The target 'sleep_quality' is binary (0 = poor, 1 = good).
     """
@@ -22,8 +22,8 @@ def generate_dataset(n=100, random_seed=42):
     stress = np.random.beta(a=2, b=3, size=n) * 9 + 1   #range 1-10
     
     #Sport time (hours/week) – many zero, some moderate
-    sport = np.random.exponential(scale=1.5, size=n)
-    sport = np.clip(sport, 0, 5)
+    activity = np.random.exponential(scale=1.5, size=n)
+    activity = np.clip(activity, 0, 5)
     
     #Nutrition (1-10) – roughly normal around 6
     nutrition = np.random.normal(6, 1.5, n)
@@ -35,7 +35,7 @@ def generate_dataset(n=100, random_seed=42):
     sleep_penalty = np.minimum(diff, 24 - diff)   #0 at 23, max 12 at 11 AM
     
     #U‑shape for sport: optimal around 2-3 hours/week
-    sport_benefit = -0.1 * (sport - 2.5) ** 2 + 0.8   #peaks at 2.5h → +0.8
+    activity_benefit = -0.1 * (activity - 2.5) ** 2 + 0.8   #peaks at 2.5h → +0.8
     
     #Base intercept to get realistic class balance (~65% poor, 35% good)
     base_intercept = -1.2
@@ -45,7 +45,7 @@ def generate_dataset(n=100, random_seed=42):
         base_intercept
         - 0.8 * sleep_penalty          #each hour away from 23 hurts
         - 0.5 * (stress - 5) / 4       #stress centered at 5
-        + 0.3 * sport_benefit
+        + 0.3 * activity_benefit
         + 0.4 * (nutrition - 5) / 4    #nutrition centered at 5
     )
     
