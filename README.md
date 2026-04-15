@@ -15,6 +15,7 @@ DataSet.scv => dataset
 
 Machine.py => The IA 
 
+#PLEASE HELP ME CHANGE THE DATESET< IDON"T KNOW HOW TO DO IT
 
 # How to update your fork
 
