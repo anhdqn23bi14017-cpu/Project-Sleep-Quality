@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-def generate_dataset(n=100, random_seed=42):
+def generate_dataset(n=100):
     """
     Features:
     - sleep_time (hour of day, 0-23, circular around optimal 23:00)
@@ -12,8 +12,6 @@ def generate_dataset(n=100, random_seed=42):
     
     The target 'sleep_quality' is binary (0 = poor, 1 = good).
     """
-    np.random.seed(random_seed)
-    
     #1.Generate features with realistic distributions
     #Sleep time: normal around 23:00 (11 PM) with wrap-around
     raw_sleep = np.random.normal(23, 2, n)
