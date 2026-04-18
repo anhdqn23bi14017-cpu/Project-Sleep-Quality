@@ -3,12 +3,13 @@ import pandas as pd
 
 def generate_dataset(n=100, random_seed=42):
     """
-    Generate a synthetic sleep quality dataset without coffee/screen time.
     Features:
     - sleep_time (hour of day, 0-23, circular around optimal 23:00)
+    - screen_time (hours per day, 0-4)
     - stress_level (1-10, 10=highest stress)
-    - activity_time (hours per week, 0-5)
+    - sport_time (hours per week, 0-5)
     - nutrition (1-10, 10=best diet)
+    
     The target 'sleep_quality' is binary (0 = poor, 1 = good).
     """
     np.random.seed(random_seed)
@@ -17,6 +18,10 @@ def generate_dataset(n=100, random_seed=42):
     #Sleep time: normal around 23:00 (11 PM) with wrap-around
     raw_sleep = np.random.normal(23, 2, n)
     sleep_time = raw_sleep % 24
+
+    #Screen time (hours/day) – log‑normal (many low, some high)
+    screen_time = np.random.lognormal(mean=0.5, sigma=0.8, size=n)
+    screen_time = np.clip(screen_time, 0, 4)
     
     #Stress level (1-10, skewed toward medium-high)
     stress = np.random.beta(a=2, b=3, size=n) * 9 + 1   #range 1-10
@@ -44,6 +49,7 @@ def generate_dataset(n=100, random_seed=42):
     score = (
         base_intercept
         - 0.8 * sleep_penalty          #each hour away from 23 hurts
+        - 0.4 * screen_time            # per hour of screen time
         - 0.5 * (stress - 5) / 4       #stress centered at 5
         + 0.3 * activity_benefit
         + 0.4 * (nutrition - 5) / 4    #nutrition centered at 5
@@ -63,6 +69,7 @@ def generate_dataset(n=100, random_seed=42):
     #4.Build DataFrame
     df = pd.DataFrame({
         "sleep_time": np.round(sleep_time, 1),
+        "screen_time": np.round(screen_time, 1),
         "stress_level": np.round(stress, 1),
         "sport_time": np.round(sport, 1),
         "nutrition": np.round(nutrition, 1),
