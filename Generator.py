@@ -77,7 +77,7 @@ def generate_dataset(n=100):
     return df
 
 #Generate and save
-df = generate_dataset(n=200, random_seed=123)
+df = generate_dataset(n=200)
 df.to_csv("Project-Sleep-Quality/DataSet.csv", index=False)
 
 #Quick sanity check
