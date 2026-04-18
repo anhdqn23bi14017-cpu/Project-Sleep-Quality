@@ -25,8 +25,8 @@ def generate_dataset(n=100):
     stress = np.random.beta(a=2, b=3, size=n) * 9 + 1   #range 1-10
     
     #Sport time (hours/week) – many zero, some moderate
-    activity = np.random.exponential(scale=1.5, size=n)
-    activity = np.clip(activity, 0, 5)
+    sport = np.random.exponential(scale=1.5, size=n)
+    sport = np.clip(activity, 0, 5)
     
     #Nutrition (1-10) – roughly normal around 6
     nutrition = np.random.normal(6, 1.5, n)
@@ -49,7 +49,7 @@ def generate_dataset(n=100):
         - 0.8 * sleep_penalty          #each hour away from 23 hurts
         - 0.4 * screen_time            # per hour of screen time
         - 0.5 * (stress - 5) / 4       #stress centered at 5
-        + 0.3 * activity_benefit
+        + 0.3 * sport_benefit
         + 0.4 * (nutrition - 5) / 4    #nutrition centered at 5
     )
     
